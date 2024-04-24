@@ -122,20 +122,34 @@ public class MainFrame extends JFrame {
         int offsetZ = Integer.parseInt(tfOffsetZ.getText()) >> 4;
         String dim = String.valueOf(cbDim.getSelectedItem()).toLowerCase();
 
-        for (int x = -size; x < size; x++)
-            for (int z = -size; z < size; z++)
-                generate(seed, x + offsetX, z + offsetZ, dim);
+        new Thread(() -> {
 
-        List<Coord> coords = new ArrayList<>(result.keySet());
-        coords.sort((l, r) -> l.x != r.x ? l.x - r.x : l.z - r.z);
-        StringBuilder sb = new StringBuilder();
-        coords.forEach(c -> sb
-                .append(c.x * 16 + 8).append(" ")
-                .append(c.y).append(" ")
-                .append(c.z * 16 + 8).append(" ")
-                .append(result.get(c))
-                .append(System.lineSeparator()));
-        taOutput.setText(sb.toString());
+            ProgressBarDialog generatingProgress = new ProgressBarDialog(
+                    this,
+                    "Generating waypoints",
+                    (int) Math.pow((size - (-size)), 2));
+
+            generatingProgress.start();
+
+            for (int x = -size; x < size; x++)
+                for (int z = -size; z < size; z++) {
+                    generate(seed, x + offsetX, z + offsetZ, dim);
+                    generatingProgress.setProgress(generatingProgress.getProgress() + 1);
+                }
+
+            generatingProgress.close();
+
+            List<Coord> coords = new ArrayList<>(result.keySet());
+            coords.sort((l, r) -> l.x != r.x ? l.x - r.x : l.z - r.z);
+            StringBuilder sb = new StringBuilder();
+            coords.forEach(c -> sb
+                    .append(c.x * 16 + 8).append(" ")
+                    .append(c.y).append(" ")
+                    .append(c.z * 16 + 8).append(" ")
+                    .append(result.get(c))
+                    .append(System.lineSeparator()));
+            taOutput.setText(sb.toString());
+        }).start();
     }
 
     private long getSeed() {
