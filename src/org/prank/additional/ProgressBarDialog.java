@@ -1,6 +1,9 @@
 package org.prank.additional;
 
+import java.awt.Dialog;
 import java.awt.Dimension;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -19,6 +22,13 @@ public class ProgressBarDialog extends JDialog {
         super(parent, title);
         setSize(new Dimension(300, 100));
         setLocationRelativeTo(null);
+        setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                System.exit(0);
+            }
+        });
 
         progressBar = new JProgressBar(0, progressBarMaxValue);
         progressBar.setValue(0);
@@ -35,7 +45,6 @@ public class ProgressBarDialog extends JDialog {
 
     public void setProgress(int progress) {
         progressBar.setValue(progress);
-        progressBar.revalidate();
     }
 
     public void close() {
@@ -44,7 +53,7 @@ public class ProgressBarDialog extends JDialog {
     }
 
     public void start() {
-        setVisible(true);
+        new Thread(() -> setVisible(true)).start();
     }
 
 }
